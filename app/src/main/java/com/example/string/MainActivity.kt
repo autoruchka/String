@@ -21,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -33,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
@@ -72,16 +74,20 @@ fun StringApp() {
 
 
     NavigationSuiteScaffold(
+        containerColor = Color(0xFF3D1611),
+        contentColor = Color(0xFFEC9C40),
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
                 item(
                     icon = {
                         Icon(
                             it.icon,
-                            contentDescription = it.label
+                            contentDescription = it.label,
+                            tint = Color(0xFFEC9C40)
                         )
                     },
-                    label = { Text(it.label) },
+                    label = { Text(it.label,
+                        color = Color(0xFFEC9C40)) },
                     selected = it == currentDestination,
                     onClick = { currentDestination = it }
                 )
@@ -91,16 +97,19 @@ fun StringApp() {
         Scaffold( topBar = {
 
             if (currentDestination == AppDestinations.HOME) {
+                Surface(
+                    color = Color(0xFFEC9C40)
+                ){
                 AppTopPanel(
                     number = streak,
                     centerText = goalText,
                     onSettingsClick = {
                         showSettingsDialog = true
                     },
-                    panelColor = panelColor,
-                    textColor = textColor,
-                    iconColor = iconColor
+                    textColor = 0xFF3D1611,
+                    iconColor = 0xFF3D1611
                 )
+            }
             }
         },modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
@@ -149,7 +158,6 @@ fun AppTopPanel(
     number: Int,
     centerText: String,
     onSettingsClick: () -> Unit,
-    panelColor: Long,
     textColor: Long,
     iconColor: Long
 ) {
@@ -162,7 +170,8 @@ fun AppTopPanel(
     ) {
         Text(
             text = number.toString(),
-            color = androidx.compose.ui.graphics.Color(textColor),
+            style = MaterialTheme.typography.displayLarge,
+            color = Color(textColor),
             modifier = Modifier
 
         )
@@ -170,7 +179,7 @@ fun AppTopPanel(
         Text(
             text = centerText,
             modifier = Modifier.weight(1f),
-            color = androidx.compose.ui.graphics.Color(textColor),
+            color = Color(textColor),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
@@ -179,7 +188,7 @@ fun AppTopPanel(
             Icon(
                 imageVector = Icons.Filled.Settings,
                 contentDescription = "Settings" ,
-                tint = androidx.compose.ui.graphics.Color(iconColor)
+                tint = Color(iconColor)
             )
         }
 

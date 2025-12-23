@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -86,8 +85,7 @@ fun StringApp() {
                             tint = Color(0xFFEC9C40)
                         )
                     },
-                    label = { Text(it.label,
-                        color = Color(0xFFEC9C40)) },
+                    label = { Text(it.label, color = Color(0xFFEC9C40)) },
                     selected = it == currentDestination,
                     onClick = { currentDestination = it }
                 )
@@ -97,9 +95,6 @@ fun StringApp() {
         Scaffold( topBar = {
 
             if (currentDestination == AppDestinations.HOME) {
-                Surface(
-                    color = Color(0xFFEC9C40)
-                ){
                 AppTopPanel(
                     number = streak,
                     centerText = goalText,
@@ -109,29 +104,27 @@ fun StringApp() {
                     textColor = 0xFF3D1611,
                     iconColor = 0xFF3D1611
                 )
+
             }
-            }
-        },modifier = Modifier.fillMaxSize()) { innerPadding ->
+        },){ padding ->
             when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(
-                    modifier = Modifier.padding(innerPadding)
-                )
+                AppDestinations.HOME ->
+                    HomeScreen(
+                        modifier = Modifier.padding(padding),
+                        viewModel = viewModel
+                    )
 
-                AppDestinations.GAME -> Greeting(
-                    name = "Game Screen",
-                    modifier = Modifier.padding(innerPadding)
-                )
+                AppDestinations.GAME ->
+                    Greeting("Game Screen", Modifier.padding(padding))
             }
-
-            if (showSettingsDialog) {
-                SettingsDialog(
-                    goalText = goalText,
-                    onGoalChange = { goalText = it },
-                    onDismiss = { showSettingsDialog = false }
-                )
-            }
-
         }
+    }
+    if (showSettingsDialog) {
+        SettingsDialog(
+            goalText = goalText,
+            onGoalChange = { goalText = it },
+            onDismiss = { showSettingsDialog = false }
+        )
     }
 }
 
@@ -161,6 +154,10 @@ fun AppTopPanel(
     textColor: Long,
     iconColor: Long
 ) {
+    Surface(
+        color = Color(0xFFEC9C40)
+    ){
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -187,11 +184,11 @@ fun AppTopPanel(
         IconButton(onClick = onSettingsClick) {
             Icon(
                 imageVector = Icons.Filled.Settings,
-                contentDescription = "Settings" ,
+                contentDescription = "Settings",
                 tint = Color(iconColor)
             )
         }
-
+    }
     }
 }
 

@@ -3,65 +3,61 @@ package com.example.string.logic
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.io.File
 import java.time.LocalDate
-import kotlin.math.abs
 
 class StreakViewModel : ViewModel() {
 
-    private val _streak = MutableStateFlow(1)
-    val streak = _streak.asStateFlow()
+    private val _streak = MutableStateFlow(0)
+    val streak: StateFlow<Int> = _streak
 
     private var lastDate: LocalDate? = null
-    private var storage: LocalStreakStorage? = null
+    private lateinit var file: File
 
-    // Must call this when HomeScreen is shown
+
     fun initialize(context: Context) {
-        if (storage != null) return // already initialized
+        if (::file.isInitialized) return
 
-        storage = LocalStreakStorage(context)
+        file = File(context.filesDir, "streak.txt")
 
-        loadStreak()
-    }
-
-    private fun loadStreak() {
-        val saved = storage?.readStreak()
-
-        if (saved == null) {
-            // first time user opens the app
-            _streak.value = 1
-            lastDate = LocalDate.now()
-            storage?.writeStreak(1, LocalDate.now())
-            return
+        if (file.exists()) {
+            val lines = file.readLines()
+            _streak.value = lines.firstOrNull()?.toIntOrNull() ?: 0
+            lastDate = lines.getOrNull(1)?.let { LocalDate.parse(it) }
         }
-
-        val (savedStreak, savedDate) = saved
-        lastDate = savedDate
-
-        val today = LocalDate.now()
-        val daysDifference = abs(savedDate.toEpochDay() - today.toEpochDay())
-
-        _streak.value = if (daysDifference >= 2) 1 else savedStreak
     }
 
     fun onStreakTap() {
         val today = LocalDate.now()
-        val last = lastDate ?: today
-        val diff = (abs(last.toEpochDay() - today.toEpochDay())).toInt()
 
-        when (diff) {
-            0 -> { // same day → undo or increase
-                _streak.value = if (_streak.value > 1) _streak.value - 1 else 1
-            }
-            1 -> { // next day → increase
-                _streak.value = _streak.value + 1
-            }
-            else -> { // 2+ days → reset
+        when {
+            lastDate == null -> {
                 _streak.value = 1
+                lastDate = today
+            }
+
+            lastDate == today -> {
+                // undo
+                _streak.value = maxOf(0, _streak.value - 1)
+                lastDate = null
+            }
+
+            lastDate == today.minusDays(1) -> {
+                _streak.value += 1
+                lastDate = today
+            }
+
+            else -> {
+                _streak.value = 1
+                lastDate = today
             }
         }
 
-        lastDate = today
-        storage?.writeStreak(_streak.value, today)
+        save()
+    }
+
+    private fun save() {
+        file.writeText("${_streak.value}\n${lastDate ?: ""}")
     }
 }

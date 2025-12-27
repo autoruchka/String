@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.example.string.logic.StreakViewModel
 import com.example.string.ui.theme.StringTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.string.ui.theme.GameScreen
 import com.example.string.ui.theme.HomeScreen
 
 
@@ -114,8 +115,9 @@ fun StringApp() {
                         viewModel = viewModel
                     )
 
-                AppDestinations.GAME ->
-                    Greeting("Game Screen", Modifier.padding(padding))
+                AppDestinations.GAME -> GameScreen(
+                    modifier = Modifier.padding(padding)
+                )
             }
         }
     }

@@ -31,6 +31,7 @@ fun GameScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(Color(0xFF3D1611))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -53,7 +54,7 @@ fun GameScreen(
                 },
                 textStyle = TextStyle(fontSize = MaterialTheme.typography.headlineMedium.fontSize),
                 modifier = Modifier
-                    .background(Color.LightGray)
+                    .background(Color(0xFFC6651A))
                     .padding(8.dp)
             )
 
@@ -62,7 +63,7 @@ fun GameScreen(
             Text(
                 text = "Tap to submit",
                 modifier = Modifier
-                    .background(Color.DarkGray)
+                    .background(Color(0xFFC6651A))
                     .padding(8.dp)
                     .clickable {
                         viewModel.submitGuess(currentGuess)
@@ -90,9 +91,9 @@ fun GuessRow(guess: String, results: List<LetterResult>) {
                     .padding(4.dp)
                     .background(
                         when (results[index]) {
-                            LetterResult.CORRECT -> Color(0xFF6AAA64)
-                            LetterResult.PRESENT -> Color(0xFFC9B458)
-                            LetterResult.WRONG -> Color(0xFF787C7E)
+                            LetterResult.CORRECT -> Color(0xFFFFFBA9)
+                            LetterResult.PRESENT -> Color(0xFFFF7700)
+                            LetterResult.WRONG -> Color(0xFF3D1611)
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -115,7 +116,7 @@ fun EmptyRow() {
                 modifier = Modifier
                     .size(56.dp)
                     .padding(4.dp)
-                    .background(Color.LightGray)
+                    .background(Color(0xFFC6651A))
             )
         }
     }

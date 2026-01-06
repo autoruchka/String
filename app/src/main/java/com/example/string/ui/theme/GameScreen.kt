@@ -179,9 +179,9 @@ fun Keyboard(
         KeyboardRow("QWERTYUIOP", letterStates, onLetter)
         KeyboardRow("ASDFGHJKL", letterStates, onLetter)
         Row {
-            Key("ENTER", Color.DarkGray) { onEnter() }
+            Key("ENTER", Color(0xFF5E271C)) { onEnter() }
             KeyboardRow("ZXCVBNM", letterStates, onLetter)
-            Key("⌫", Color.DarkGray) { onDelete() }
+            Key("⌫", Color(0xFF5E271C)) { onDelete() }
         }
     }
 }

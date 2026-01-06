@@ -54,7 +54,7 @@ fun GameScreen(
                 },
                 textStyle = TextStyle(fontSize = MaterialTheme.typography.headlineMedium.fontSize),
                 modifier = Modifier
-                    .background(Color(0xFFC6651A))
+                    .background(Color(0xFF5E271C))
                     .padding(8.dp)
             )
 
@@ -63,7 +63,7 @@ fun GameScreen(
             Text(
                 text = "Tap to submit",
                 modifier = Modifier
-                    .background(Color(0xFFC6651A))
+                    .background(Color(0xFF5E271C))
                     .padding(8.dp)
                     .clickable {
                         viewModel.submitGuess(currentGuess)
@@ -75,7 +75,10 @@ fun GameScreen(
         } else {
             Text(
                 text = if (won) "You won!" else "You lost :(",
-                style = MaterialTheme.typography.headlineMedium
+                color = Color.White,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier
+                    .background(Color(0xFF5E271C))
             )
         }
     }
@@ -101,7 +104,13 @@ fun GuessRow(guess: String, results: List<LetterResult>) {
                 Text(
                     text = char.toString(),
                     style = MaterialTheme.typography.headlineMedium,
-                    color = Color.White
+                    color = (
+                            when (results[index]) {
+                                LetterResult.CORRECT -> Color(0xFF3D1611)
+                                LetterResult.PRESENT -> Color(0xFF3D1611)
+                                LetterResult.WRONG -> Color(0xFFFFFFFF)
+                            }
+                            )
                 )
             }
         }
@@ -116,7 +125,7 @@ fun EmptyRow() {
                 modifier = Modifier
                     .size(56.dp)
                     .padding(4.dp)
-                    .background(Color(0xFFC6651A))
+                    .background(Color(0xFF5E271C))
             )
         }
     }

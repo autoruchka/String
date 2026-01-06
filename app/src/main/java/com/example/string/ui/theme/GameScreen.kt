@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -29,6 +30,10 @@ fun GameScreen(
     val won by viewModel.won.collectAsState()
     val letterStates by viewModel.letterStates.collectAsState()
     var currentGuess by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) { viewModel.initialize(context) }
+
 
     Column(
         modifier = modifier
@@ -85,6 +90,9 @@ fun GameScreen(
             )
         }
 
+
+        val invalidWord by viewModel.invalidWord.collectAsState()
+
         Keyboard(
             letterStates = letterStates,
             onLetter = {
@@ -99,6 +107,15 @@ fun GameScreen(
                 currentGuess = ""
             }
         )
+
+        if (invalidWord) {
+            Text(
+                text = "Not a valid word",
+                color = Color.Red,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+
 
     }
 }

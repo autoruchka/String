@@ -22,6 +22,9 @@ class WordViewModel : ViewModel(){
     val gameOver: StateFlow<Boolean> = _gameOver
 
     private val _won = MutableStateFlow(false)
+    private val _letterStates = MutableStateFlow<Map<Char, LetterResult>>(emptyMap())
+
+    val letterStates: StateFlow<Map<Char, LetterResult>> = _letterStates
     val won: StateFlow<Boolean> = _won
 
     fun submitGuess(guess: String) {
@@ -32,6 +35,20 @@ class WordViewModel : ViewModel(){
         val newGuesses = _guesses.value + upper
         _guesses.value = newGuesses
 
+        val updatedStates = _letterStates.value.toMutableMap()
+        val results = evaluateGuess(upper)
+
+        upper.forEachIndexed { index, char ->
+            val result = results[index]
+            val current = updatedStates[char]
+
+            if (current == null || result.ordinal < current.ordinal) {
+                updatedStates[char] = result
+            }
+        }
+
+        _letterStates.value = updatedStates
+
         if (upper == secretWord) {
             _won.value = true
             _gameOver.value = true
@@ -39,6 +56,7 @@ class WordViewModel : ViewModel(){
             _gameOver.value = true
         }
     }
+
 
     fun evaluateGuess(guess: String): List<LetterResult> {
         return guess.mapIndexed { index, char ->

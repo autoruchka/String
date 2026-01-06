@@ -19,7 +19,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AnimatedCenterImage(centerPainter: androidx.compose.ui.graphics.painter.Painter) {
-    // Animates X offset back and forth
+
+    //reminder to do ti later
+
     val movement = 40.dp
     val density = LocalDensity.current
     val pxMovement = with(density) { movement.toPx() }

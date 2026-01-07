@@ -2,7 +2,6 @@ package com.example.string.ui.theme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.content.TransferableContent.Source.Companion.Keyboard
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -59,27 +58,16 @@ fun GameScreen(
                 onValueChange = {
                     if (it.length <= 5) currentGuess = it.uppercase()
                 },
-                textStyle = TextStyle(fontSize = MaterialTheme.typography.headlineMedium.fontSize),
+                textStyle = TextStyle(fontSize = MaterialTheme.typography.headlineMedium.fontSize, color = Color.White),
                 modifier = Modifier
                     .background(Color(0xFF5E271C))
-                    .padding(8.dp)
+                    .padding(8.dp),
+
+
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-
-            Text(
-                text = "Tap to submit",
-                modifier = Modifier
-                    .background(Color(0xFF5E271C))
-                    .padding(8.dp)
-                    .clickable {
-                        viewModel.submitGuess(currentGuess)
-                        currentGuess = ""
-                    },
-                color = Color.White,
-                style = MaterialTheme.typography.bodyLarge
-            )
         } else {
             Text(
                 text = if (won) "You won!" else "You lost :(",
@@ -107,14 +95,6 @@ fun GameScreen(
                 currentGuess = ""
             }
         )
-
-        if (invalidWord) {
-            Text(
-                text = "Not a valid word",
-                color = Color.Red,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
 
 
     }
@@ -179,9 +159,9 @@ fun Keyboard(
         KeyboardRow("QWERTYUIOP", letterStates, onLetter)
         KeyboardRow("ASDFGHJKL", letterStates, onLetter)
         Row {
-            Key("ENTER", Color(0xFF5E271C)) { onEnter() }
+            Key("ENTER", Color(0xFF5E271C), Color.White) { onEnter() }
             KeyboardRow("ZXCVBNM", letterStates, onLetter)
-            Key("⌫", Color(0xFF5E271C)) { onDelete() }
+            Key("⌫", Color(0xFF5E271C), Color.White) { onDelete() }
         }
     }
 }
@@ -190,6 +170,7 @@ fun Keyboard(
 fun KeyboardRow(
     letters: String,
     letterStates: Map<Char, LetterResult>,
+
     onLetter: (Char) -> Unit
 ) {
     Row {
@@ -200,13 +181,17 @@ fun KeyboardRow(
                 LetterResult.WRONG -> Color(0xFF3D1611)
                 null -> Color(0xFF5E271C)
             }
-            Key(char.toString(), color) { onLetter(char) }
+            val textColor = when (letterStates[char]) {
+                LetterResult.CORRECT -> Color(0xFF3D1611)
+                else -> Color.White
+            }
+            Key(char.toString(), color, textColor) { onLetter(char) }
         }
     }
 }
 
 @Composable
-fun Key(label: String, color: Color, onClick: () -> Unit) {
+fun Key(label: String, color: Color, textColor: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .padding(2.dp)

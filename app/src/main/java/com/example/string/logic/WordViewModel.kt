@@ -41,7 +41,7 @@ class WordViewModel : ViewModel(){
 
     fun submitGuess(guess: String) {
         if (_gameOver.value) return
-        if (guess.length != 5) return
+        if (guess.length != 5 || !(wordList.contains(guess))) return
 
         val upper = guess.uppercase()
         val newGuesses = _guesses.value + upper

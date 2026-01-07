@@ -20,15 +20,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,12 +42,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.string.logic.StreakViewModel
 import com.example.string.ui.theme.StringTheme
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.string.ui.theme.GameScreen
 import com.example.string.ui.theme.HomeScreen
-
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,19 +63,34 @@ class MainActivity : ComponentActivity() {
 
 @PreviewScreenSizes
 @Composable
-fun StringApp() {
+fun StringApp(
+    viewModel: StreakViewModel = viewModel()
+) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var goalText by rememberSaveable { mutableStateOf("My streak") }
-    val viewModel: StreakViewModel = viewModel()
-    val streak by viewModel.streak.collectAsState()
 
-    val (panelColor, textColor, iconColor) = if (currentDestination == AppDestinations.HOME) {
-        Triple(0xFFEC9C40, 0xFF3D1611, 0xFF3D1611)  // Home panel: orange bg, brown text/icon
-    } else {
-        Triple(0xFF3D1611, 0xFFEC9C40, 0xFFEC9C40)  // Game panel: brown bg, orange text/icon
+    val streak by viewModel.streak.collectAsState()
+    val lastDate by viewModel.lastDate.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // Show error messages
+    LaunchedEffect(error) {
+        error?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(it)
+                viewModel.dismissError()
+            }
+        }
     }
 
+    val (panelColor, textColor, iconColor) = if (currentDestination == AppDestinations.HOME) {
+        Triple(0xFFEC9C40, 0xFF3D1611, 0xFF3D1611)
+    } else {
+        Triple(0xFF3D1611, 0xFFEC9C40, 0xFFEC9C40)
+    }
 
     NavigationSuiteScaffold(
         containerColor = Color(0xFF3D1611),
@@ -93,34 +112,37 @@ fun StringApp() {
             }
         }
     ) {
-        Scaffold( topBar = {
-
-            if (currentDestination == AppDestinations.HOME) {
-                AppTopPanel(
-                    number = streak,
-                    centerText = goalText,
-                    onSettingsClick = {
-                        showSettingsDialog = true
-                    },
-                    textColor = 0xFF3D1611,
-                    iconColor = 0xFF3D1611
-                )
-
-            }
-        },){ padding ->
+        Scaffold(
+            topBar = {
+                if (currentDestination == AppDestinations.HOME) {
+                    AppTopPanel(
+                        number = streak,
+                        centerText = goalText,
+                        onSettingsClick = { showSettingsDialog = true },
+                        textColor = textColor,
+                        iconColor = iconColor
+                    )
+                }
+            },
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { padding ->
             when (currentDestination) {
-                AppDestinations.HOME ->
+                AppDestinations.HOME -> {
                     HomeScreen(
                         modifier = Modifier.padding(padding),
                         viewModel = viewModel
                     )
+                }
 
-                AppDestinations.GAME -> GameScreen(
-                    modifier = Modifier.padding(padding)
-                )
+                AppDestinations.GAME -> {
+                    GameScreen(
+                        modifier = Modifier.padding(padding)
+                    )
+                }
             }
         }
     }
+
     if (showSettingsDialog) {
         SettingsDialog(
             goalText = goalText,
@@ -138,16 +160,6 @@ enum class AppDestinations(
     HOME("Streak", Icons.Filled.CheckCircle)
 }
 
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = name,
-        modifier = modifier
-    )
-}
-
-
 @Composable
 fun AppTopPanel(
     number: Int,
@@ -158,39 +170,37 @@ fun AppTopPanel(
 ) {
     Surface(
         color = Color(0xFFEC9C40)
-    ){
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = number.toString(),
-            style = MaterialTheme.typography.displayLarge,
-            color = Color(textColor),
+        Row(
             modifier = Modifier
-
-        )
-
-        Text(
-            text = centerText,
-            modifier = Modifier.weight(1f),
-            color = Color(textColor),
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center
-        )
-
-        IconButton(onClick = onSettingsClick) {
-            Icon(
-                imageVector = Icons.Filled.Settings,
-                contentDescription = "Settings",
-                tint = Color(iconColor)
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = number.toString(),
+                style = MaterialTheme.typography.displayLarge,
+                color = Color(textColor),
+                modifier = Modifier
             )
+
+            Text(
+                text = centerText,
+                modifier = Modifier.weight(1f),
+                color = Color(textColor),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center
+            )
+
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = "Settings",
+                    tint = Color(iconColor)
+                )
+            }
         }
-    }
     }
 }
 
@@ -207,7 +217,6 @@ fun SettingsDialog(
         },
         text = {
             Column {
-                // Language label
                 Text(
                     text = "Language: English",
                     style = MaterialTheme.typography.bodyLarge
@@ -215,7 +224,6 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Goal label + textfield
                 Text(text = "Your goal:")
                 OutlinedTextField(
                     value = goalText,
@@ -232,5 +240,3 @@ fun SettingsDialog(
         }
     )
 }
-
-
